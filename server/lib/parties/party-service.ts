@@ -1,24 +1,18 @@
 import cuid from 'cuid'
 import { NydusServer } from 'nydus'
-import { singleton } from 'tsyringe'
+import { container, singleton } from 'tsyringe'
+import { NotificationType } from '../../../common/notifications'
+import { MAX_PARTY_SIZE, PartyUser } from '../../../common/parties'
 import logger from '../logging/logger'
+import { Notification } from '../notifications/notification-model'
+import NotificationService from '../notifications/notification-service'
 import {
   ClientSocketsGroup,
   ClientSocketsManager,
   UserSocketsManager,
 } from '../websockets/socket-groups'
 
-/**
- * The maximum number of players allowed to be in the same party at once. Note that this only
- * restricts the amount of players *in* the party, it doesn't limit the number of invites to the
- * party.
- */
-const MAX_PARTY_SIZE = 8
-
-export interface PartyUser {
-  id: number
-  name: string
-}
+const notificationService = container.resolve(NotificationService)
 
 export interface PartyRecord {
   id: string
@@ -69,6 +63,7 @@ export function toPartyJson(party: PartyRecord): PartyJson {
 export default class PartyService {
   private parties = new Map<string, PartyRecord>()
   private clientSocketsToPartyId = new Map<ClientSocketsGroup, string>()
+  private userNotifications = new Map<string, Notification>()
 
   constructor(
     private nydus: NydusServer,
@@ -85,6 +80,8 @@ export default class PartyService {
         "Can't invite yourself to the party",
       )
     }
+
+    // TODO(2Pac): Check that the invite doesn't already exists
 
     let party = this.getClientParty(leaderClientSockets)
     if (party) {
@@ -117,12 +114,13 @@ export default class PartyService {
       this.subscribeToParty(leaderClientSockets, party)
     }
 
-    invites.forEach(i => {
-      // TODO(2Pac): Send the invite notification once the server-side notification system is in.
+    invites.forEach(async i => {
+      const userId = i.id
+      const partyId = party!.id
       const userSockets = this.userSocketsManager.getByName(i.name)
       if (userSockets) {
         userSockets.subscribe(
-          getInvitesPath(party!.id, userSockets.userId),
+          getInvitesPath(partyId, userId),
           () => ({
             type: 'addInvite',
             from: leader,
@@ -132,6 +130,18 @@ export default class PartyService {
           },
         )
       }
+
+      // TODO(2Pac): Handle errors here. If the notification is not sent, then the invite doesn't
+      // make much sense, and needs to be cleaned up.
+      const notification = await notificationService.addNotification({
+        userId,
+        data: {
+          type: NotificationType.PartyInvite,
+          from: leader.name,
+          partyId,
+        },
+      })
+      this.userNotifications.set(`${userId}|${partyId}`, notification)
     })
 
     return party
@@ -212,6 +222,8 @@ export default class PartyService {
       )
     }
 
+    // TODO(2Pac): Only allow accepting an invite for electron clients?
+
     const userParty = this.getClientParty(clientSockets)
     if (userParty) {
       // TODO(2Pac): Handle switching parties
@@ -232,7 +244,7 @@ export default class PartyService {
 
   private unsubscribeFromInvites(party: PartyRecord, user: PartyUser) {
     this.nydus.publish(getInvitesPath(party.id, user.id), { type: 'removeInvite' })
-    // TODO(2Pac): Remove the invite notification once the server-side notification system is in.
+    // notificationService.clearById(user.id, [])
     const userSockets = this.userSocketsManager.getByName(user.name)
     if (userSockets) {
       userSockets.unsubscribe(getInvitesPath(party.id, user.id))

@@ -182,9 +182,8 @@ class MainLayout extends React.Component {
       if (!this.props.auth.emailVerified) {
         this.props.dispatch(
           addNotification({
-            type: NotificationType.EmailVerification,
             id: EMAIL_VERIFICATION_ID,
-            unread: true,
+            type: NotificationType.EmailVerification,
           }),
         )
       }

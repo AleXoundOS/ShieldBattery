@@ -2,8 +2,14 @@ import { AuthActions } from './auth/actions'
 import { LadderActions } from './ladder/actions'
 import { MatchmakingActions } from './matchmaking/actions'
 import { NotificationActions } from './notifications/actions'
+import { PartiesActions } from './parties/actions'
 
-type AllActions = AuthActions | LadderActions | MatchmakingActions | NotificationActions
+type AllActions =
+  | AuthActions
+  | LadderActions
+  | MatchmakingActions
+  | NotificationActions
+  | PartiesActions
 
 export type ReduxAction = Extract<AllActions, { type: string }>
 
