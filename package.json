@@ -20,7 +20,7 @@
   "author": "Travis Collins <travis@tec27.com> (http://tec27.com/)",
   "main": "index.js",
   "engines": {
-    "node": ">= 14.0.0"
+    "node": ">= 13.8.0"
   },
   "jest": {
     "setupFilesAfterEnv": [
@@ -81,7 +81,7 @@
     "cross-env": "^7.0.2",
     "cross-env-test": "^0.1.1",
     "cuid": "^2.1.8",
-    "dateformat": "^4.4.1",
+    "dateformat": "^4.5.1",
     "db-migrate": "^0.11.6",
     "db-migrate-pg": "^1.0.0",
     "dotenv": "^8.2.0",
@@ -116,8 +116,8 @@
     "pino-http": "^5.1.0",
     "pino-pretty": "^4.0.0",
     "pino-tee": "^0.3.0",
-    "rally-point-creator": "^2.0.0",
-    "rally-point-server": "^2.0.0",
+    "rally-point-creator": "^1.0.0",
+    "rally-point-server": "^1.0.0",
     "regenerator-runtime": "^0.13.3",
     "rimraf": "^3.0.0",
     "scm-extractor": "^1.0.6",
@@ -205,7 +205,7 @@
     "prettier-plugin-organize-imports": "^1.1.1",
     "prop-types": "^15.7.2",
     "query-string": "^7.0.0",
-    "rally-point-player": "^2.0.0",
+    "rally-point-player": "^1.0.0",
     "react": "^17.0.1",
     "react-custom-scrollbars": "^4.2.1",
     "react-dom": "^17.0.1",
