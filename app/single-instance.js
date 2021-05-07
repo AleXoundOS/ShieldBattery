@@ -15,7 +15,7 @@ export default function () {
   const socket =
     process.platform === 'win32'
       ? `\\\\.\\pipe\\${sanitize(process.env.USERNAME)}-${app.name}-singleInstance`
-      : path.join(os.tempdir(), app.name + '.sock')
+      : path.join(os.tmpdir(), app.name + '.sock')
 
   const client = net
     .connect(socket, () => {
